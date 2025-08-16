@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn, fetchChatbotResponse } from "@/lib/utils";
+import { cn, fetchChatbotResponse, formatRecommendations, formatInvestmentSuggestions, type ApiResponse } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 interface Message {
@@ -9,13 +9,19 @@ interface Message {
   content: string;
   isUser: boolean;
   timestamp: Date;
+  metadata?: {
+    confidence?: number;
+    sources?: Array<{ title: string; url: string }>;
+    symbols?: string[];
+    suggestions?: Array<{ title: string; description: string; symbol: string }>;
+  };
 }
 
 export function ChatBox() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: "👋 Hello! I'm your AI assistant. How can I help you today?",
+      content: "👋 Hello! I'm your AI investment assistant. I can help you with investment advice, portfolio analysis, and market insights. How can I help you today?",
       isUser: false,
       timestamp: new Date(),
     },
@@ -33,43 +39,70 @@ export function ChatBox() {
       timestamp: new Date(),
     };
 
-    // Debug: log the payload being sent to the backend
-    console.log("[DEBUG] Request payload:", {
-      userId: "demo-user",
-      queryText: userMessage.content,
-    });
-
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
     try {
-      const data = await fetchChatbotResponse("demo-user", userMessage.content);
+      const data: ApiResponse = await fetchChatbotResponse("demo-user", userMessage.content);
+
       let content = "";
-      if (data.reasoning) content += `💡 Reasoning:\n${data.reasoning}\n\n`;
-      if (data.recommendations && Object.keys(data.recommendations).length > 0) {
-        content += `📊 Recommendations:\n`;
-        for (const [symbol, rec] of Object.entries(data.recommendations)) {
-          content += `- ${symbol}: ${rec}\n`;
-        }
-        content += "\n";
+
+      if (data.reasoning) {
+        content += `💡 Analysis:\n${data.reasoning}\n\n`;
       }
-      if (data.summary?.text) content += `📝 Summary:\n${data.summary.text}`;
-      if (!content) content = "No answer found.";
+
+      const recommendationsText = formatRecommendations(data.recommendations);
+      if (recommendationsText) {
+        content += `${recommendationsText}\n`;
+      }
+
+      if (data.personalized_advice && data.personalized_advice !== "Advice has been personalized based on your profile and portfolio.") {
+        content += `🎯 Personalized Advice:\n${data.personalized_advice}\n\n`;
+      }
+
+      const suggestionsText = formatInvestmentSuggestions(data.investment_suggestions);
+      if (suggestionsText) {
+        content += `${suggestionsText}\n`;
+      }
+
+      if (data.confidence) {
+        content += `📈 Confidence Level: ${Math.round(data.confidence * 100)}%\n`;
+      }
+
+      if (data.risk_assessment && data.risk_assessment !== "Mentioned in the explanation.") {
+        content += `⚠️ Risk Assessment: ${data.risk_assessment}\n`;
+      }
+
+      if (!content.trim()) {
+        content = "I received your question but couldn't generate a comprehensive response. Please try rephrasing your question or ask about specific investments like stocks, gold, or crypto.";
+      }
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content,
+        content: content.trim(),
         isUser: false,
         timestamp: new Date(),
+        metadata: {
+          confidence: data.confidence,
+          sources: data.source_links?.map(link => ({ title: link.title, url: link.url })),
+          symbols: data.symbols_analyzed,
+          suggestions: data.investment_suggestions?.map(s => ({ 
+            title: s.title, 
+            description: s.description, 
+            symbol: s.symbol 
+          }))
+        }
       };
+
       setMessages((prev) => [...prev, aiMessage]);
     } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 2).toString(),
-          content:
-            `😎 Oops! Something went wrong: ${err instanceof Error ? err.message : String(err)}\nTry asking about FPT, VIC, or VCB stocks for cool answers!`,
+          content: `😔 I encountered an issue while processing your request: ${errorMessage}\n\nPlease try again or ask about investment topics like:\n• Stock analysis (e.g., "Tell me about FPT stock")\n• Gold investment advice\n• Portfolio diversification\n• Market trends`,
           isUser: false,
           timestamp: new Date(),
         },
@@ -86,6 +119,11 @@ export function ChatBox() {
     }
   };
 
+  const handleQuickAction = (text: string) => {
+    if (isLoading) return;
+    setInputValue(text);
+  };
+
   return (
     <div className="flex flex-col h-full w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden">
       <div className="border-b border-border p-4 md:p-6 bg-gradient-to-r from-card to-card/80 backdrop-blur-sm">
@@ -95,7 +133,7 @@ export function ChatBox() {
               🤖 Beaver AI Assistant
             </h2>
             <p className="text-sm md:text-base text-muted-foreground mt-1">
-              Ask me anything about our services and get personalized recommendations
+              Your intelligent investment advisor for personalized financial guidance
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -126,6 +164,30 @@ export function ChatBox() {
               <div className="whitespace-pre-wrap leading-relaxed">
                 {message.content}
               </div>
+              
+              {/* Show metadata for AI messages */}
+              {!message.isUser && message.metadata && (
+                <div className="mt-3 pt-3 border-t border-border/50">
+                  {message.metadata.symbols && message.metadata.symbols.length > 0 && (
+                    <div className="text-xs text-muted-foreground mb-2">
+                      📊 Analyzed: {message.metadata.symbols.join(", ")}
+                    </div>
+                  )}
+                  {message.metadata.sources && message.metadata.sources.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      🔗 Sources: {message.metadata.sources.map((source, idx) => (
+                        <span key={idx}>
+                          <a href={source.url} target="_blank" rel="noopener noreferrer" className="hover:underline">
+                            {source.title}
+                          </a>
+                          {message.metadata && idx < message.metadata.sources!.length - 1 && ", "}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+              
               <div className={cn(
                 "text-xs mt-2 opacity-70",
                 message.isUser ? "text-primary-foreground/70" : "text-muted-foreground"
@@ -145,7 +207,7 @@ export function ChatBox() {
                   <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-100"></div>
                   <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce delay-200"></div>
                 </div>
-                <span className="text-muted-foreground text-xs">AI is typing...</span>
+                <span className="text-muted-foreground text-xs">AI is analyzing your request...</span>
               </div>
             </div>
           </div>
@@ -159,7 +221,7 @@ export function ChatBox() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message here... (Press Enter to send)"
+              placeholder="Ask me about investments, stocks, portfolio advice... (Press Enter to send)"
               className="w-full min-h-[44px] md:min-h-[50px] max-h-[120px] md:max-h-[150px] p-3 md:p-4 border border-border rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary bg-background text-foreground placeholder-muted-foreground text-sm md:text-base transition-all duration-200"
               disabled={isLoading}
               rows={1}
@@ -184,29 +246,35 @@ export function ChatBox() {
             )}
           </Button>
         </div>
-        
-        {/* Quick Actions */}
+
         <div className="flex flex-wrap gap-2 mt-4">
           <button
-            onClick={() => setInputValue("What services do you offer?")}
+            onClick={() => handleQuickAction("I want to invest in Gold")}
             className="px-3 py-1.5 text-xs md:text-sm bg-muted hover:bg-muted/80 text-muted-foreground rounded-full transition-colors duration-200 hover:scale-105"
             disabled={isLoading}
           >
-            💼 Services
+            🥇 Gold Investment
           </button>
           <button
-            onClick={() => setInputValue("Show me recommendations")}
+            onClick={() => handleQuickAction("What stocks should I buy?")}
             className="px-3 py-1.5 text-xs md:text-sm bg-muted hover:bg-muted/80 text-muted-foreground rounded-full transition-colors duration-200 hover:scale-105"
             disabled={isLoading}
           >
-            ⭐ Recommendations
+            📈 Stock Recommendations
           </button>
           <button
-            onClick={() => setInputValue("How does this work?")}
+            onClick={() => handleQuickAction("How should I diversify my portfolio?")}
             className="px-3 py-1.5 text-xs md:text-sm bg-muted hover:bg-muted/80 text-muted-foreground rounded-full transition-colors duration-200 hover:scale-105"
             disabled={isLoading}
           >
-            ❓ Help
+            📊 Portfolio Advice
+          </button>
+          <button
+            onClick={() => handleQuickAction("Tell me about cryptocurrency investments")}
+            className="px-3 py-1.5 text-xs md:text-sm bg-muted hover:bg-muted/80 text-muted-foreground rounded-full transition-colors duration-200 hover:scale-105"
+            disabled={isLoading}
+          >
+            ₿ Crypto Insights
           </button>
         </div>
       </div>
