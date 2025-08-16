@@ -33,15 +33,32 @@ export function ChatBox() {
       timestamp: new Date(),
     };
 
+    // Debug: log the payload being sent to the backend
+    console.log("[DEBUG] Request payload:", {
+      userId: "demo-user",
+      queryText: userMessage.content,
+    });
+
     setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsLoading(true);
 
     try {
       const data = await fetchChatbotResponse("demo-user", userMessage.content);
+      let content = "";
+      if (data.reasoning) content += `💡 Reasoning:\n${data.reasoning}\n\n`;
+      if (data.recommendations && Object.keys(data.recommendations).length > 0) {
+        content += `📊 Recommendations:\n`;
+        for (const [symbol, rec] of Object.entries(data.recommendations)) {
+          content += `- ${symbol}: ${rec}\n`;
+        }
+        content += "\n";
+      }
+      if (data.summary?.text) content += `📝 Summary:\n${data.summary.text}`;
+      if (!content) content = "No answer found.";
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: data.summary?.text || "No answer found.",
+        content,
         isUser: false,
         timestamp: new Date(),
       };
@@ -71,7 +88,6 @@ export function ChatBox() {
 
   return (
     <div className="flex flex-col h-full w-full bg-card border border-border rounded-lg shadow-lg overflow-hidden">
-      {/* Chat Header */}
       <div className="border-b border-border p-4 md:p-6 bg-gradient-to-r from-card to-card/80 backdrop-blur-sm">
         <div className="flex items-center justify-between">
           <div>
@@ -89,7 +105,6 @@ export function ChatBox() {
         </div>
       </div>
 
-      {/* Messages Area */}
       <div className="flex-1 overflow-y-auto chat-scrollbar p-4 md:p-6 space-y-4 md:space-y-6 bg-gradient-to-b from-background/50 to-background">
         {messages.map((message) => (
           <div
@@ -137,7 +152,6 @@ export function ChatBox() {
         )}
       </div>
 
-      {/* Input Area */}
       <div className="border-t border-border p-4 md:p-6 bg-card/50 backdrop-blur-sm">
         <div className="flex items-end space-x-3 md:space-x-4">
           <div className="flex-1 relative">
