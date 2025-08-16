@@ -1,13 +1,9 @@
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { AdBoxProps } from "@/types/adbox";
 
 export function AdBox({
   title,
-  imageUrl,
   description,
-  ctaText = "Learn More",
-  ctaUrl = "#",
   className,
 }: AdBoxProps) {
   return (
@@ -17,16 +13,6 @@ export function AdBox({
         className
       )}
     >
-      <div className="relative w-full h-32 rounded-md overflow-hidden">
-        <Image
-          src={imageUrl}
-          alt={title}
-          fill
-          className="object-cover"
-          sizes="(max-width: 300px) 100vw, 300px"
-        />
-      </div>
-
       <div className="space-y-2">
         <h3 className="font-semibold text-sm text-foreground line-clamp-2">
           {title}
@@ -36,14 +22,10 @@ export function AdBox({
         </p>
       </div>
 
-      <a
-        href={ctaUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-block w-full text-center bg-primary text-primary-foreground text-xs font-medium py-2 px-3 rounded-md hover:bg-primary/90 transition-colors"
+      <button
+        className="w-full text-center bg-primary text-primary-foreground text-xs font-medium py-2 px-3 rounded-md hover:bg-primary/90 transition-colors"
       >
-        {ctaText}
-      </a>
+      </button>
     </div>
   );
 }

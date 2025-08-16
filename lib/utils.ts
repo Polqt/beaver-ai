@@ -16,7 +16,6 @@ export interface InvestmentSuggestion {
   description: string;
   asset_class: string;
   symbol: string;
-  imageUrl: string;
 }
 
 export interface BiasAnalysis {

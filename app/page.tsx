@@ -1,7 +1,7 @@
 'use client';
 
+import { AdBox } from "@/components/ad-box";
 import { ChatBox } from "@/components/chat-box";
-import { AdBox } from "@/components/ui/ad-box";
 import { fetchChatbotResponse, type ApiResponse } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -28,10 +28,7 @@ export default function Home() {
               <AdBox
                 key={idx}
                 title={rec.title}
-                imageUrl={rec.imageUrl}
                 description={rec.description}
-                ctaText={"Invest Now"}
-                ctaUrl={`/asset/${rec.symbol}`}
               />
             ))}
           </div>
@@ -50,10 +47,8 @@ export default function Home() {
               <AdBox
                 key={`trending-${idx}`}
                 title={rec.title}
-                imageUrl={rec.imageUrl}
+
                 description={rec.description}
-                ctaText={"View"}
-                ctaUrl={`/asset/${rec.symbol}`}
               />
             ))}
           </div>
