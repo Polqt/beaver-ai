@@ -26,9 +26,11 @@ export default function Home() {
             </h2>
             {ads.map((rec, idx) => (
               <AdBox
-                key={idx}
-                title={rec.title}
+                key={rec.symbol || idx} 
+                imageUrl={rec.imageUrl}
+                title={`${rec.symbol} - ${rec.title}`} 
                 description={rec.description}
+                symbol={rec.symbol}
               />
             ))}
           </div>
@@ -43,12 +45,13 @@ export default function Home() {
             <h2 className="text-lg font-semibold text-foreground mb-4">
               Trending
             </h2>
-            {ads.slice(0, 2).map((rec, idx) => (
+            {ads.map((rec, idx) => (
               <AdBox
-                key={`trending-${idx}`}
-                title={rec.title}
-
+                key={rec.symbol || idx} 
+                imageUrl={rec.imageUrl}
+                title={`${rec.symbol} - ${rec.title}`} 
                 description={rec.description}
+                symbol={rec.symbol}
               />
             ))}
           </div>

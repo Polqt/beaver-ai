@@ -5,20 +5,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export interface SourceLink {
+interface SourceLink {
   index: number;
   title: string;
   url: string;
 }
 
-export interface InvestmentSuggestion {
+interface InvestmentSuggestion {
   title: string;
   description: string;
   asset_class: string;
   symbol: string;
+  imageUrl: string;
 }
 
-export interface BiasAnalysis {
+interface BiasAnalysis {
   status: string;
 }
 
