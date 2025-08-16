@@ -38,7 +38,7 @@ export function AdBox({
     };
     
     const color = colors[symbol as keyof typeof colors] || '#6366F1';
-
+    
     const svg = `
       <svg width="200" height="120" xmlns="http://www.w3.org/2000/svg">
         <defs>
@@ -58,6 +58,14 @@ export function AdBox({
     return `data:image/svg+xml;base64,${btoa(svg)}`;
   };
 
+  const isValidImageUrl = (url: string) => {
+    if (!url) return false;
+    if (url.includes('ads.beaverx.ai') || url.includes('sample_banner')) return false;
+    return url.startsWith('http') && (url.includes('.jpg') || url.includes('.png') || url.includes('.webp') || url.includes('.svg'));
+  };
+
+  const imageToUse = (imageUrl && isValidImageUrl(imageUrl)) ? imageUrl : getPlaceholderImage(symbol);
+
   return (
     <div
       className={cn(
@@ -65,10 +73,9 @@ export function AdBox({
         className
       )}
     >
-      {/* Image Container with Overlay */}
       <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gradient-to-br from-muted to-muted/50">
         <Image
-          src={imageUrl || getPlaceholderImage(symbol)}
+          src={imageToUse}
           alt={title}
           fill
           className="object-cover transition-transform duration-300 group-hover:scale-110"
@@ -76,23 +83,18 @@ export function AdBox({
           onError={handleImageError}
         />
         
-        {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-        
-        {/* Asset Class Badge */}
+      
         <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm border border-border/50 rounded-full p-1.5">
           {getAssetIcon()}
         </div>
         
-        {/* Symbol Badge */}
         <div className="absolute bottom-2 left-2 bg-primary/90 backdrop-blur-sm text-primary-foreground text-xs font-mono font-semibold px-2 py-1 rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           {symbol}
         </div>
       </div>
 
-      {/* Content */}
       <div className="space-y-3">
-        {/* Header with Symbol */}
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-sm text-foreground line-clamp-2 leading-tight group-hover:text-primary transition-colors duration-200">
             {title}
@@ -105,14 +107,6 @@ export function AdBox({
         <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed">
           {description}
         </p>
-
-        <div className="flex items-center justify-between pt-2 border-t border-border/30">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <TrendingUp className="w-3 h-3" />
-            <span>Investment</span>
-          </div>
-          
-        </div>
       </div>
     </div>
   );
