@@ -85,13 +85,12 @@ export function ChatBox() {
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
+    } catch {
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 2).toString(),
-          content: `😔 I encountered an issue while processing your request: ${errorMessage}\n\nPlease try again or ask about investment topics like:\n• Stock analysis (e.g., "Tell me about FPT stock")\n• Gold investment advice\n• Portfolio diversification\n• Market trends`,
+          content: `😔 I encountered an issue while processing your request: Please try again or ask about investment topics like:\n• Stock analysis (e.g., "Tell me about FPT stock")\n• Gold investment advice\n• Portfolio diversification\n• Market trends`,
           isUser: false,
           timestamp: new Date(),
         },
@@ -119,7 +118,7 @@ export function ChatBox() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-bold text-xl md:text-2xl text-foreground flex items-center gap-2">
-              🤖 Beaver AI Assistant
+              🤖 Beaver X Assistant
             </h2>
             <p className="text-sm md:text-base text-muted-foreground mt-1">
               Your intelligent investment advisor for personalized financial guidance
@@ -235,8 +234,7 @@ export function ChatBox() {
             )}
           </Button>
         </div>
-        
-        {/* Quick Actions */}
+
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={() => handleQuickAction("I want to invest in Gold")}

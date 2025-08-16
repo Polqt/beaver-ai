@@ -1,14 +1,6 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-
-interface AdBoxProps {
-  title: string;
-  imageUrl: string;
-  description: string;
-  ctaText?: string;
-  ctaUrl?: string;
-  className?: string;
-}
+import { AdBoxProps } from "@/types/adbox";
 
 export function AdBox({
   title,
@@ -34,7 +26,7 @@ export function AdBox({
           sizes="(max-width: 300px) 100vw, 300px"
         />
       </div>
-      
+
       <div className="space-y-2">
         <h3 className="font-semibold text-sm text-foreground line-clamp-2">
           {title}
@@ -43,9 +35,11 @@ export function AdBox({
           {description}
         </p>
       </div>
-      
+
       <a
         href={ctaUrl}
+        target="_blank"
+        rel="noopener noreferrer"
         className="inline-block w-full text-center bg-primary text-primary-foreground text-xs font-medium py-2 px-3 rounded-md hover:bg-primary/90 transition-colors"
       >
         {ctaText}
