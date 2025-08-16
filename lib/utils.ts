@@ -6,7 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export async function fetchChatbotResponse(userId: string, queryText: string) {
-  const res = await fetch('http://127.0.0.1:8000/api/v1/chatbot/query', {
+  const res = await fetch('/api/chatbot', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
