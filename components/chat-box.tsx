@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn, fetchChatbotResponse } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 interface Message {
@@ -37,17 +37,29 @@ export function ChatBox() {
     setInputValue("");
     setIsLoading(true);
 
-    // Simulate AI response (replace with actual API call)
-    setTimeout(() => {
+    try {
+      const data = await fetchChatbotResponse("demo-user", userMessage.content);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: `I received your message: "${userMessage.content}". This is a demo response. In a real implementation, this would be connected to an AI service like OpenAI, Claude, or a custom AI model.`,
+        content: data.summary?.text || "No answer found.",
         isUser: false,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: (Date.now() + 2).toString(),
+          content:
+            `😎 Oops! Something went wrong: ${err instanceof Error ? err.message : String(err)}\nTry asking about FPT, VIC, or VCB stocks for cool answers!`,
+          isUser: false,
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

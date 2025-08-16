@@ -1,4 +1,4 @@
-import { ChatBox } from "@/components/ui/chat-box";
+import { ChatBox } from "@/components/chat-box";
 import { AdBox } from "@/components/ui/ad-box";
 
 export default function Home() {
@@ -12,14 +12,14 @@ export default function Home() {
             </h2>
             <AdBox
               title="Smart Home Devices"
-              imageUrl="/ad-banner-1.svg"
+              imageUrl="https://cdn.jsdelivr.net/gh/beaver-ai/assets/ad-banner-1.svg"
               description="Discover the latest smart home technology tailored to your lifestyle. Transform your living space with AI-powered devices."
               ctaText="Shop Now"
               ctaUrl="#"
             />
             <AdBox
               title="Fitness & Wellness"
-              imageUrl="/ad-banner-2.svg"
+              imageUrl="https://cdn.jsdelivr.net/gh/beaver-ai/assets/ad-banner-2.svg"
               description="Personalized fitness equipment and wellness products based on your health goals and preferences."
               ctaText="Explore"
               ctaUrl="#"
