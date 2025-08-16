@@ -5,6 +5,7 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// API Response interfaces for the new endpoint
 export interface SourceLink {
   index: number;
   title: string;
@@ -63,6 +64,7 @@ export interface ApiResponse {
   investment_suggestions: InvestmentSuggestion[];
 }
 
+// Default portfolio structure for users
 const defaultPortfolio: Portfolio = {
   transactions: [],
   watchList: [],
@@ -114,6 +116,7 @@ export async function fetchChatbotResponse(userId: string, question: string): Pr
   }
 }
 
+// Helper function to format recommendations
 export function formatRecommendations(recommendations: Record<string, unknown>): string {
   if (!recommendations || Object.keys(recommendations).length === 0) {
     return "";
@@ -126,6 +129,7 @@ export function formatRecommendations(recommendations: Record<string, unknown>):
   return formatted;
 }
 
+// Helper function to format investment suggestions
 export function formatInvestmentSuggestions(suggestions: InvestmentSuggestion[]): string {
   if (!suggestions || suggestions.length === 0) {
     return "";

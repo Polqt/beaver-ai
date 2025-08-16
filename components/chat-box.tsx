@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { cn, fetchChatbotResponse, formatRecommendations, formatInvestmentSuggestions, type ApiResponse } from "@/lib/utils";
+import { cn, fetchChatbotResponse, formatRecommendations, type ApiResponse } from "@/lib/utils";
 import { Button } from "./ui/button";
 
 interface Message {
@@ -13,7 +13,6 @@ interface Message {
     confidence?: number;
     sources?: Array<{ title: string; url: string }>;
     symbols?: string[];
-    suggestions?: Array<{ title: string; description: string; symbol: string }>;
   };
 }
 
@@ -61,11 +60,6 @@ export function ChatBox() {
         content += `🎯 Personalized Advice:\n${data.personalized_advice}\n\n`;
       }
 
-      const suggestionsText = formatInvestmentSuggestions(data.investment_suggestions);
-      if (suggestionsText) {
-        content += `${suggestionsText}\n`;
-      }
-
       if (data.confidence) {
         content += `📈 Confidence Level: ${Math.round(data.confidence * 100)}%\n`;
       }
@@ -87,11 +81,6 @@ export function ChatBox() {
           confidence: data.confidence,
           sources: data.source_links?.map(link => ({ title: link.title, url: link.url })),
           symbols: data.symbols_analyzed,
-          suggestions: data.investment_suggestions?.map(s => ({ 
-            title: s.title, 
-            description: s.description, 
-            symbol: s.symbol 
-          }))
         }
       };
 
@@ -246,7 +235,8 @@ export function ChatBox() {
             )}
           </Button>
         </div>
-
+        
+        {/* Quick Actions */}
         <div className="flex flex-wrap gap-2 mt-4">
           <button
             onClick={() => handleQuickAction("I want to invest in Gold")}
