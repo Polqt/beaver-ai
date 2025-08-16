@@ -183,3 +183,119 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .scrollbar-gentle {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.04) transparent;
+  }
+
+  .scrollbar-gentle::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-gentle::-webkit-scrollbar-track {
+    background: transparent;
+    margin: 8px 0;
+  }
+
+  .scrollbar-gentle::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .scrollbar-gentle::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  /* Even more subtle variant */
+  .scrollbar-invisible {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.02) transparent;
+  }
+
+  .scrollbar-invisible::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-invisible::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-invisible::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .scrollbar-invisible::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.08);
+    width: 6px;
+  }
+
+  /* Auto-hide variant - only shows on hover */
+  .scrollbar-autohide {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar {
+    width: 0px;
+    transition: width 0.2s ease;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-autohide::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+  }
+
+  .scrollbar-autohide:hover {
+    scrollbar-color: rgba(255, 255, 255, 0.05) transparent;
+  }
+
+  .scrollbar-autohide:hover::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollbar-autohide:hover::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .scrollbar-autohide:hover::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+img[src=""] {
+  background: linear-gradient(90deg, hsl(var(--muted)) 0%, hsl(var(--muted-foreground)) 50%, hsl(var(--muted)) 100%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

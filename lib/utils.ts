@@ -78,6 +78,69 @@ const defaultPortfolio: Portfolio = {
   ]
 };
 
+// Fallback data for when API fails or returns empty suggestions
+const getFallbackSuggestions = (question: string): InvestmentSuggestion[] => {
+  const questionLower = question.toLowerCase();
+  
+  // Default suggestions based on question content
+  if (questionLower.includes('gold') || questionLower.includes('precious metal')) {
+    return [
+      {
+        title: "Stabilize with Gold",
+        description: "Hedge against market fluctuations with gold investments.",
+        asset_class: "commodity",
+        symbol: "GOLD",
+        imageUrl: "https://ads.beaverx.ai/sample_banner/gold.png"
+      }
+    ];
+  } else if (questionLower.includes('tech') || questionLower.includes('technology')) {
+    return [
+      {
+        title: "Tech Growth Opportunity",
+        description: "Invest in leading technology companies for growth potential.",
+        asset_class: "stock",
+        symbol: "TECH",
+        imageUrl: "https://ads.beaverx.ai/sample_banner/stock.png"
+      }
+    ];
+  } else if (questionLower.includes('crypto') || questionLower.includes('bitcoin')) {
+    return [
+      {
+        title: "Digital Assets - Bitcoin",
+        description: "Explore cryptocurrency investments with Bitcoin.",
+        asset_class: "crypto",
+        symbol: "BTC",
+        imageUrl: "https://ads.beaverx.ai/sample_banner/crypto.png"
+      }
+    ];
+  }
+  
+  // Generic fallback suggestions
+  return [
+    {
+      title: "Diversify with Tech Growth",
+      description: "Leverage market opportunities with technology investments.",
+      asset_class: "stock",
+      symbol: "TECH",
+      imageUrl: "https://ads.beaverx.ai/sample_banner/stock.png"
+    },
+    {
+      title: "Stabilize with Gold",
+      description: "Hedge against market fluctuations with gold.",
+      asset_class: "commodity",
+      symbol: "GOLD",
+      imageUrl: "https://ads.beaverx.ai/sample_banner/gold.png"
+    },
+    {
+      title: "Explore Digital Assets",
+      description: "Consider cryptocurrency for portfolio diversification.",
+      asset_class: "crypto",
+      symbol: "BTC",
+      imageUrl: "https://ads.beaverx.ai/sample_banner/crypto.png"
+    }
+  ];
+};
+
 export async function fetchChatbotResponse(userId: string, question: string): Promise<ApiResponse> {
   const requestPayload: ApiRequest = {
     question: question,
@@ -101,17 +164,41 @@ export async function fetchChatbotResponse(userId: string, question: string): Pr
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`API Error (${response.status}): ${errorText}`);
+      console.error(`API Error (${response.status}): ${errorText}`);
+
+      return createFallbackResponse(question, userId);
     }
 
     const data: ApiResponse = await response.json();
-    console.log("[DEBUG] API Response:", data);
+
+    if (!data.investment_suggestions || data.investment_suggestions.length === 0) {
+      data.investment_suggestions = getFallbackSuggestions(question);
+    }
     
     return data;
   } catch (error) {
     console.error("[ERROR] API call failed:", error);
-    throw error;
+
+    return createFallbackResponse(question, userId);
   }
+}
+
+function createFallbackResponse(question: string, userId: string): ApiResponse {
+  return {
+    question,
+    symbols_analyzed: [],
+    recommendations: {},
+    reasoning: "I'm currently having trouble accessing real-time data, but I can still provide some general investment guidance based on your question. Please try again later for more detailed analysis.",
+    personalized_advice: "Advice will be more detailed once connection is restored.",
+    confidence: 0.5,
+    risk_assessment: "General risk assessment unavailable",
+    bias_analysis: { status: "Analysis unavailable" },
+    data_sources: ["Fallback Response"],
+    timestamp: new Date().toISOString(),
+    detected_language: "en",
+    source_links: [],
+    investment_suggestions: getFallbackSuggestions(question)
+  };
 }
 
 export function formatRecommendations(recommendations: Record<string, unknown>): string {
@@ -136,4 +223,30 @@ export function formatInvestmentSuggestions(suggestions: InvestmentSuggestion[])
     formatted += `${index + 1}. ${suggestion.title} (${suggestion.symbol})\n   ${suggestion.description}\n`;
   });
   return formatted;
+}
+
+export function extractSymbolsFromQuestion(question: string): string[] {
+  const questionLower = question.toLowerCase();
+  const symbols: string[] = [];
+
+  const symbolMap: Record<string, string> = {
+    'gold': 'GOLD',
+    'bitcoin': 'BTC',
+    'ethereum': 'ETH',
+    'apple': 'AAPL',
+    'microsoft': 'MSFT',
+    'tesla': 'TSLA',
+    'amazon': 'AMZN',
+    'google': 'GOOGL',
+    'nvidia': 'NVDA',
+    'meta': 'META'
+  };
+  
+  for (const [keyword, symbol] of Object.entries(symbolMap)) {
+    if (questionLower.includes(keyword)) {
+      symbols.push(symbol);
+    }
+  }
+  
+  return symbols;
 }
